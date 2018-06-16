@@ -55,7 +55,9 @@ function customPolicyBuilder(event, principal, decodedJwt) {
     }
 }
 
-const lambdaAuthorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer({ policyBuilder: customPolicyBuilder });
+const lambdaAuthorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
+    { policyBuilder: customPolicyBuilder }
+);
 
 exports.handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
 ```
@@ -73,7 +75,9 @@ function customContextBuilder(event, principal, decodedToken) {
     }
 }
 
-const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer({ contextBuilder: customContextBuilder});
+const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
+    { contextBuilder: customContextBuilder }
+);
 
 exports.handler = authorizer.handler.bind(authorizer);
 ```
@@ -92,7 +96,9 @@ function customAuthChecks(event, principal, decodedToken) {
     }
 }
 
-const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer({ authChecks: customAuthChecks});
+const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
+    { authChecks: customAuthChecks }
+);
 
 exports.handler = authorizer.handler.bind(authorizer);
 ```
