@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://bitbucket.org/mnservices/aws-apigw-authorizer.git"
+    "url": "git+https://github.com/ottokruse/aws-apigw-authorizer.git"
   },
   "author": "pi-team@mn.nl",
   "files": [
@@ -21,7 +21,7 @@
     "lib/!(*.spec).d.ts"
   ],
   "license": "ISC",
-  "homepage": "https://bitbucket.org/mnservices/aws-apigw-authorizer#readme",
+  "homepage": "https://github.com/ottokruse/aws-apigw-authorizer",
   "dependencies": {
     "basic-auth": "^2.0.0",
     "ip-range-check": "0.0.2",
