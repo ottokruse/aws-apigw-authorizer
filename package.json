@@ -1,6 +1,6 @@
 {
   "name": "aws-apigw-authorizer",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "AWS Lambda Authorizer for API Gateway",
   "main": "lib/authorizer.js",
   "typings": "lib/authorizer.d.ts",
