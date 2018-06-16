@@ -1,0 +1,12 @@
+{
+    "keys": [{
+        "alg": "RS256",
+        "kty": "RSA",
+        "use": "sig",
+        "x5c": ["CORRUPT"],
+        "n": "7ly2LoZZuQxGQVcTuCooNY3ihtI0rWNbtVtXgZ4DPgqQ42kjvz0MOh4N8r9djOhxqYX9D2ZGe_rA9rn1T1CBOj3tn40X9nRPsIoP3IwkMZ-2EGPa1sY7ywUAAmOAAdSxNd9O2HFG-rcI-Hzg01sxr56n7YGjA2k589gum7E14IDUvGNUtaeyKHarHL7aJpbeB2w7T1mC55xHw8EWV_nqQVBJz9vH0Jy37EVJhJRSmmEUS67mJ4kJt2k29aWELiUmxm-jBZM05wgrp0dudTkewEQresUYApYOalpe9sEXhC5t1xsVLXa6Qhm6Qr9ZCZEi4RYmu6athzuRyfvbZ1_jHQ",
+        "e": "AQAB",
+        "kid": "NUMxNUQ1RDkxRkJGNERCQ0ZCQkRDRjcxRjIwRDNBNDc2QjU5MDdEMQ",
+        "x5t": "NUMxNUQ1RDkxRkJGNERCQ0ZCQkRDRjcxRjIwRDNBNDc2QjU5MDdEMQ"
+    }]
+}
