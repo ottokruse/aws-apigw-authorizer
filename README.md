@@ -13,13 +13,21 @@ In the default configuration this authorizer will grant the user access to invok
 
 Configuration can be provided through Lambda environment variables (see below).
 
-## Implement an API Gateway Authorizer Lambda functions as follows:
+## How to use
+
+Create a Lambda function in AWS using *Node 8.10* runtime and use the following code:
 
 ```js
 const lambdaAuthorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer();
 
 exports.handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
 ```
+
+Of course you will have to create a deployment package to include `aws-apigw-authorizer` and it's dependencies.
+
+    npm install aws-apigw-authorizer
+
+See instructions here: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-create-deployment-pkg.html
 
 ### Custom Policy Builder
 
