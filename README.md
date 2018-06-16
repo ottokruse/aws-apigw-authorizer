@@ -170,7 +170,7 @@ Your lambda function should be configured using the following environment variab
 
 ### 3.1. ALLOWED_IP_ADDRESSES
 
-It is mandatory to explicitly specify which remote IP adresses/address rangers are allowed to access the API.
+It is mandatory to explicitly specify which remote IP adresses/address ranges are allowed to access the API.
 
 ALLOWED_IP_ADDRESSES can be set to `0.0.0.0/0` for public access.
 
