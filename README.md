@@ -1,21 +1,36 @@
 # AWS Lambda Authorizer for API Gateway
 
-## This is an AWS Lambda Authorizer for API Gateway
+This is an implementation in NodeJS of an authorizer function for AWS API Gateway. 
 
-This is an implementation in NodeJS of a custom authorizer function for AWS API Gateway. (https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html)
+https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html
 
-This custom authorizer supports these authentication mechanisms:
+<!-- TOC -->
+
+- [1. Supported Authentication Mechanisms](#1-supported-authentication-mechanisms)
+- [2. How to use](#2-how-to-use)
+    - [2.1. Custom Policy Builder](#21-custom-policy-builder)
+    - [2.2. Custom Context Builder](#22-custom-context-builder)
+    - [2.3. Custom Auth Checks](#23-custom-auth-checks)
+    - [2.4. Custom Determination of Principal ID](#24-custom-determination-of-principal-id)
+- [3. Supported Environment Variables:](#3-supported-environment-variables)
+    - [3.1. ALLOWED_IP_ADDRESSES](#31-allowed_ip_addresses)
+    - [3.2. BASIC_AUTH_USER_XXX](#32-basic_auth_user_xxx)
+    - [3.3. AUDIENCE_URI, ISSUER_URI, JWKS_URI](#33-audience_uri-issuer_uri-jwks_uri)
+
+<!-- /TOC -->
+
+## 1. Supported Authentication Mechanisms
+
+The authorizer supports these authentication mechanisms:
 
 - JWT
 - Basic Authentication
 
-In the default configuration this authorizer will grant the user access to invoke all resources of the API using any HTTP method.
+Also, the authorizer can be configured to only allow certain source IP's (see below).
 
-Configuration can be provided through Lambda environment variables (see below).
+## 2. How to use
 
-## How to use
-
-Create a Lambda function in AWS using *Node 8.10* runtime and use the following code:
+Create a Lambda function in AWS using **Node 8.10** runtime and use the following code:
 
 ```js
 const lambdaAuthorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer();
@@ -29,7 +44,9 @@ Of course you will have to create a deployment package to include `aws-apigw-aut
 
 See instructions here: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-create-deployment-pkg.html
 
-### Custom Policy Builder
+Make sure you give the lambda the right environment variables, see below.
+
+### 2.1. Custom Policy Builder
 
 A custom function can be provided for building custom AWS IAM policies. The custom function will be called after succesfull authentication:
 
@@ -70,7 +87,9 @@ const lambdaAuthorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthori
 exports.handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
 ```
 
-### Custom Context Builder
+If a custom policy builder is not provided, the default policy builder will be used, which will grant the user access to invoke all resources of the API using any HTTP method.
+
+### 2.2. Custom Context Builder
 
 A custom function can be provided for setting the authorization context (https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html). The custom function will be called after succesfull authentication:
 
@@ -92,7 +111,7 @@ exports.handler = authorizer.handler.bind(authorizer);
 
 If you throw an error anywhere in the customContextBuilder the request will be denied (HTTP 401).
 
-### Custom Auth Checks
+### 2.3. Custom Auth Checks
 
 A custom function can be provided in which you can include your own checks. If you throw an error anywhere in that function the request will be denied (HTTP 401).
 
@@ -111,12 +130,42 @@ const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
 exports.handler = authorizer.handler.bind(authorizer);
 ```
 
-## Configuration through environment variables:
+### 2.4. Custom Determination of Principal ID
 
-Your lambda function should be configured using the following environment variables.
+If you want to take control of the determination of the principalId that is used in the AWS policy and cloudwatch logging, specify a custom JwtPrincipalIdSelectorFunction.
 
+This is only useful for JWT auth, because for Basic Authentication the username will always be used as principalId.
 
-### ALLOWED_IP_ADDRESSES
+```js
+// May return promise or synchronous result as below
+function customJwtPrincipalIdSelectorFunction(event, principal, decodedToken) {
+    return 'principalId of your liking';
+}
+
+const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
+    { jwtPrincipalIdSelectorFunction: customJwtPrincipalIdSelectorFunction }
+);
+
+exports.handler = authorizer.handler.bind(authorizer);
+```
+
+If a custom principalId selector for JWT is not provided, the default principalId selector for JWT will be used which will try the following JWT claims in order, the first one that has a value will be used:
+
+1. `email`
+1. `upn`
+1. `sub`
+
+## 3. Supported Environment Variables:
+
+Your lambda function should be configured using the following environment variables:
+
+- ALLOWED_IP_ADDRESSES (mandatory)
+- BASIC_AUTH_USER_xxx (mandatory for Basic Authentication)
+- AUDIENCE_URI (mandatory for use of JWT Authentication)
+- ISSUER_URI (mandatory for use of JWT Authentication)
+- JWKS_URI (mandatory for use of JWT Authentication)
+
+### 3.1. ALLOWED_IP_ADDRESSES
 
 It is mandatory to explicitly specify which remote IP adresses/address rangers are allowed to access the API.
 
@@ -129,7 +178,7 @@ Example:
     ALLOWED_IP_ADDRESSES=213.149.225.141/32,213.149.225.141
 
 
-### BASIC_AUTH_USER_XXX
+### 3.2. BASIC_AUTH_USER_XXX
 
 Users allowed access through HTTP Basic Authentication can be configured as follows:
 
@@ -139,7 +188,7 @@ Users allowed access through HTTP Basic Authentication can be configured as foll
 This is an optional environment key, without which Basic Authentication is not enabled.
 
 
-### AUDIENCE_URI, ISSUER_URI, JWKS_URI
+### 3.3. AUDIENCE_URI, ISSUER_URI, JWKS_URI
 
 For JWT authentication provide a value for `AUDIENCE_URI`, `ISSUER_URI` and `JWKS_URI`
 
