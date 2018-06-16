@@ -2,16 +2,17 @@
 
 This is an implementation in NodeJS of an authorizer function for AWS API Gateway. 
 
-https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html
+(i.e. an implementation of this: https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html)
 
 <!-- TOC -->
 
 - [1. Supported Authentication Mechanisms](#1-supported-authentication-mechanisms)
 - [2. How to use](#2-how-to-use)
-    - [2.1. Custom Policy Builder](#21-custom-policy-builder)
-    - [2.2. Custom Context Builder](#22-custom-context-builder)
-    - [2.3. Custom Auth Checks](#23-custom-auth-checks)
-    - [2.4. Custom Determination of Principal ID](#24-custom-determination-of-principal-id)
+    - [2.1. Basic usage](#21-basic-usage)
+    - [2.2. Customize Policy Builder](#22-customize-policy-builder)
+    - [2.3. Customize Context Builder](#23-customize-context-builder)
+    - [2.4. Customize Auth Checks](#24-customize-auth-checks)
+    - [2.5. Customize Determination of principalId](#25-customize-determination-of-principalid)
 - [3. Supported Environment Variables:](#3-supported-environment-variables)
     - [3.1. ALLOWED_IP_ADDRESSES](#31-allowed_ip_addresses)
     - [3.2. BASIC_AUTH_USER_XXX](#32-basic_auth_user_xxx)
@@ -30,6 +31,8 @@ Also, the authorizer can be configured to only allow certain source IP's (see be
 
 ## 2. How to use
 
+### 2.1. Basic usage
+
 Create a Lambda function in AWS using **Node 8.10** runtime and use the following code:
 
 ```js
@@ -46,7 +49,7 @@ See instructions here: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-creat
 
 Make sure you give the lambda the right environment variables, see below.
 
-### 2.1. Custom Policy Builder
+### 2.2. Customize Policy Builder
 
 A custom function can be provided for building custom AWS IAM policies. The custom function will be called after succesfull authentication:
 
@@ -89,7 +92,7 @@ exports.handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
 
 If a custom policy builder is not provided, the default policy builder will be used, which will grant the user access to invoke all resources of the API using any HTTP method.
 
-### 2.2. Custom Context Builder
+### 2.3. Customize Context Builder
 
 A custom function can be provided for setting the authorization context (https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html). The custom function will be called after succesfull authentication:
 
@@ -111,7 +114,7 @@ exports.handler = authorizer.handler.bind(authorizer);
 
 If you throw an error anywhere in the customContextBuilder the request will be denied (HTTP 401).
 
-### 2.3. Custom Auth Checks
+### 2.4. Customize Auth Checks
 
 A custom function can be provided in which you can include your own checks. If you throw an error anywhere in that function the request will be denied (HTTP 401).
 
@@ -130,15 +133,15 @@ const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
 exports.handler = authorizer.handler.bind(authorizer);
 ```
 
-### 2.4. Custom Determination of Principal ID
+### 2.5. Customize Determination of principalId
 
 If you want to take control of the determination of the principalId that is used in the AWS policy and cloudwatch logging, specify a custom JwtPrincipalIdSelectorFunction.
 
-This is only useful for JWT auth, because for Basic Authentication the username will always be used as principalId.
+This is only useful for JWT auth, because for Basic Authentication the username will be used as principalId.
 
 ```js
 // May return promise or synchronous result as below
-function customJwtPrincipalIdSelectorFunction(event, principal, decodedToken) {
+function customJwtPrincipalIdSelectorFunction(event, decodedToken) {
     return 'principalId of your liking';
 }
 
