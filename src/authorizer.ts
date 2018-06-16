@@ -1,7 +1,7 @@
 import * as basicAuthValidator from './basic-auth-validator';
 import * as ipRangeCheck from 'ip-range-check';
 import * as jwtValidator from './jwt-validator';
-import * as AWSLambda from './lambda';
+import * as AWSLambda from 'aws-lambda';
 const awsPolicyLib = require('./aws-policy-lib');
 
 export type PolicyBuilderFunction = (event: AWSLambda.CustomAuthorizerEvent, principalId: string, decodedToken?: Jwt) => AWSLambda.PolicyDocument | Promise<AWSLambda.PolicyDocument>;

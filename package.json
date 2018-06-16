@@ -1,9 +1,15 @@
 {
   "name": "aws-apigw-authorizer",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "AWS Lambda Authorizer for API Gateway",
   "keywords": [
-    "aws", "apigateway", "authorizer", "api", "gateway", "custom", "amazon"
+    "aws",
+    "apigateway",
+    "authorizer",
+    "api",
+    "gateway",
+    "custom",
+    "amazon"
   ],
   "main": "lib/authorizer.js",
   "typings": "lib/authorizer.d.ts",
@@ -26,6 +32,7 @@
   "license": "ISC",
   "homepage": "https://github.com/ottokruse/aws-apigw-authorizer",
   "dependencies": {
+    "@types/aws-lambda": "^8.10.6",
     "basic-auth": "^2.0.0",
     "ip-range-check": "0.0.2",
     "jsonwebtoken": "^8.3.0",
