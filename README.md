@@ -11,7 +11,7 @@ This is an implementation in NodeJS of an authorizer function for AWS API Gatewa
     - [2.1. Basic usage](#21-basic-usage)
     - [2.2. Customize Policy Builder](#22-customize-policy-builder)
     - [2.3. Customize Context Builder](#23-customize-context-builder)
-    - [2.4. Customize Auth Checks](#24-customize-auth-checks)
+    - [2.4. Customize Additional Auth Checks](#24-customize-additional-auth-checks)
     - [2.5. Customize Determination of principalId](#25-customize-determination-of-principalid)
 - [3. Supported Environment Variables:](#3-supported-environment-variables)
     - [3.1. ALLOWED_IP_ADDRESSES](#31-allowed_ip_addresses)
@@ -47,7 +47,7 @@ Of course you will have to create a deployment package to include `aws-apigw-aut
 
 See instructions here: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-create-deployment-pkg.html
 
-Make sure you give the lambda the right environment variables, see below.
+Make sure you give the lambda the right environment variables, see below. You'll have to configure at least Basic Authentication or JWT auth.
 
 Use the Lambda function you created for your API Gateway Authorizer. Make sure the "Lambda Event Payload" of that authorizer is set to "Request" (explained here: https://aws.amazon.com/blogs/compute/using-enhanced-request-authorizers-in-amazon-api-gateway/). This will (a.o.) give access to the source IP-address of calls to your API.
 
@@ -116,9 +116,9 @@ exports.handler = authorizer.handler.bind(authorizer);
 
 If you throw an error anywhere in the customContextBuilder the request will be denied (HTTP 401).
 
-### 2.4. Customize Auth Checks
+### 2.4. Customize Additional Auth Checks
 
-A custom function can be provided in which you can include your own checks. If you throw an error anywhere in that function the request will be denied (HTTP 401).
+The validity of the JWT and/or Basic Authentication credentials will always be checked. A custom function can be provided in which you can include your own additional checks. If you throw an error anywhere in that function the request will be denied (HTTP 401).
 
 ```js
 // May return promise or synchronous result as below
