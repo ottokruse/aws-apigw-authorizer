@@ -7,16 +7,19 @@ This is an implementation in NodeJS of an authorizer function for AWS API Gatewa
 <!-- TOC -->
 
 - [1. Supported Authentication Mechanisms](#1-supported-authentication-mechanisms)
-- [2. How to use](#2-how-to-use)
-    - [2.1. Basic usage](#21-basic-usage)
-    - [2.2. Customize Policy Builder](#22-customize-policy-builder)
-    - [2.3. Customize Context Builder](#23-customize-context-builder)
-    - [2.4. Customize Additional Auth Checks](#24-customize-additional-auth-checks)
-    - [2.5. Customize Determination of principalId](#25-customize-determination-of-principalid)
+- [2. Basic usage](#2-basic-usage)
+    - [2.1. Create a Lambda Function](#21-create-a-lambda-function)
+    - [2.2. Set the right environment variables](#22-set-the-right-environment-variables)
+    - [2.3. Configure your API Gateway Authorizer](#23-configure-your-api-gateway-authorizer)
 - [3. Supported Environment Variables:](#3-supported-environment-variables)
     - [3.1. ALLOWED_IP_ADDRESSES](#31-allowed_ip_addresses)
     - [3.2. BASIC_AUTH_USER_XXX](#32-basic_auth_user_xxx)
     - [3.3. AUDIENCE_URI, ISSUER_URI, JWKS_URI](#33-audience_uri-issuer_uri-jwks_uri)
+- [4. Customizations](#4-customizations)
+    - [4.1. Customize Policy Builder](#41-customize-policy-builder)
+    - [4.2. Customize Context Builder](#42-customize-context-builder)
+    - [4.3. Customize Additional Auth Checks](#43-customize-additional-auth-checks)
+    - [4.4. Customize Determination of principalId](#44-customize-determination-of-principalid)
 
 <!-- /TOC -->
 
@@ -29,9 +32,9 @@ The authorizer supports these authentication mechanisms:
 
 Also, the authorizer can be configured to only allow certain source IP's (see below).
 
-## 2. How to use
+## 2. Basic usage
 
-### 2.1. Basic usage
+### 2.1. Create a Lambda Function
 
 Create a Lambda function in AWS using **Node 8.10** runtime and use the following code:
 
@@ -47,118 +50,22 @@ Of course you will have to create a deployment package to include `aws-apigw-aut
 
 See instructions here: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-create-deployment-pkg.html
 
-Make sure you give the lambda the right environment variables, see below. You'll have to configure at least Basic Authentication or JWT auth.
+### 2.2. Set the right environment variables
 
-Use the Lambda function you created for your API Gateway Authorizer. Make sure the "Lambda Event Payload" of that authorizer is set to "Request" (explained here: https://aws.amazon.com/blogs/compute/using-enhanced-request-authorizers-in-amazon-api-gateway/). This will (a.o.) give access to the source IP-address of calls to your API.
+Give the lambda the right environment variables. You'll have to configure at least:
 
-### 2.2. Customize Policy Builder
+- Basic Authentication or JWT auth (both is allowed too)
+- Allowed source IP addresses
 
-A custom function can be provided for building custom AWS IAM policies. The custom function will be called after succesfull authentication:
+See below the exact description of the environment variables.
 
-```js
-// May return promise or synchronous result as below
-function customPolicyBuilder(event, principal, decodedJwt) {
-    // event: the raw event that the authorizer lambda function receives from API Gateway 
-    // principal: the username of the authenticated user
-    // decodedJwt: the decoded JWT. Only present if authentication was based on JWT
-    return {  
-        "principalId": "your principal - just a name",  
-        "policyDocument": {  
-            "Version": "2012-10-17",  
-            "Statement": [  
-                {  
-                    "Action": "execute-api:Invoke",
-                    "Effect": "Allow",
-                    "Resource": [
-                        "arn:aws:execute-api:eu-west-1:region:api-id/stage/*/*"
-                    ],
-                    "Condition": {
-                        "IpAddress": {
-                            "aws:SourceIp": [
-                                "123.456.789.123/32"
-                            ]
-                        }
-                    }
-                }
-            ]
-        }
-    }
-}
+### 2.3. Configure your API Gateway Authorizer
 
-const lambdaAuthorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
-    { policyBuilder: customPolicyBuilder }
-);
+Use the Lambda function you created for your API Gateway Authorizer.
 
-exports.handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
-```
+See further instructions here: https://docs.aws.amazon.com/apigateway/latest/developerguide/configure-api-gateway-lambda-authorization-with-console.html
 
-If a custom policy builder is not provided, the default policy builder will be used, which will grant the user access to invoke all resources of the API using any HTTP method.
-
-### 2.3. Customize Context Builder
-
-A custom function can be provided for setting the authorization context (https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html). The custom function will be called after succesfull authentication:
-
-```js
-// May return promise or synchronous result as below
-function customContextBuilder(event, principal, decodedToken) {
-    return {
-        name: decodedToken['sub'],
-        foo: 'bar'
-    }
-}
-
-const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
-    { contextBuilder: customContextBuilder }
-);
-
-exports.handler = authorizer.handler.bind(authorizer);
-```
-
-If you throw an error anywhere in the customContextBuilder the request will be denied (HTTP 401).
-
-### 2.4. Customize Additional Auth Checks
-
-The validity of the JWT and/or Basic Authentication credentials will always be checked. A custom function can be provided in which you can include your own additional checks. If you throw an error anywhere in that function the request will be denied (HTTP 401).
-
-```js
-// May return promise or synchronous result as below
-function customAuthChecks(event, principal, decodedToken) {
-    if (!event.headers['X-SHOULD-BE-PRESENT']) {
-        throw new Error('HTTP header X-SHOULD-BE-PRESENT is required');
-    }
-}
-
-const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
-    { authChecks: customAuthChecks }
-);
-
-exports.handler = authorizer.handler.bind(authorizer);
-```
-
-### 2.5. Customize Determination of principalId
-
-If you want to take control of the determination of the principalId that is used in the AWS policy and cloudwatch logging, specify a custom JwtPrincipalIdSelectorFunction.
-
-This is only useful for JWT auth, because for Basic Authentication the username will be used as principalId.
-
-```js
-// May return promise or synchronous result as below
-function customJwtPrincipalIdSelectorFunction(event, decodedToken) {
-    return 'principalId of your liking';
-}
-
-const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
-    { jwtPrincipalIdSelectorFunction: customJwtPrincipalIdSelectorFunction }
-);
-
-exports.handler = authorizer.handler.bind(authorizer);
-```
-
-If a custom principalId selector for JWT is not provided, the default principalId selector for JWT will be used which will try the following JWT claims in order, the first one that has a value will be used:
-
-1. `email`
-1. `upn`
-1. `sub`
+Make sure the "Lambda Event Payload" of the authorizer is set to "Request" (explained here: https://aws.amazon.com/blogs/compute/using-enhanced-request-authorizers-in-amazon-api-gateway/). This will (a.o.) give access to the source IP-address of calls to your API.
 
 ## 3. Supported Environment Variables:
 
@@ -204,3 +111,114 @@ Example:
     JWKS_URI=https://login.yourserver.com/common/discovery/keys'
 
 These are optional environment keys, without which JWT Authentication is not enabled.
+
+## 4. Customizations
+
+### 4.1. Customize Policy Builder
+
+A custom function can be provided for building custom AWS IAM policies. The custom function will be called after succesfull authentication:
+
+```js
+// May return promise or synchronous result as below
+function customPolicyBuilder(event, principal, decodedJwt) {
+    // event: the raw event that the authorizer lambda function receives from API Gateway 
+    // principal: the username of the authenticated user
+    // decodedJwt: the decoded JWT. Only present if authentication was based on JWT
+    return {  
+        "principalId": "your principal - just a name",  
+        "policyDocument": {  
+            "Version": "2012-10-17",  
+            "Statement": [  
+                {  
+                    "Action": "execute-api:Invoke",
+                    "Effect": "Allow",
+                    "Resource": [
+                        "arn:aws:execute-api:eu-west-1:region:api-id/stage/*/*"
+                    ],
+                    "Condition": {
+                        "IpAddress": {
+                            "aws:SourceIp": [
+                                "123.456.789.123/32"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
+
+const lambdaAuthorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
+    { policyBuilder: customPolicyBuilder }
+);
+
+exports.handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
+```
+
+If a custom policy builder is not provided, the default policy builder will be used, which will grant the user access to invoke all resources of the API using any HTTP method.
+
+### 4.2. Customize Context Builder
+
+A custom function can be provided for setting the authorization context (https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html). The custom function will be called after succesfull authentication:
+
+```js
+// May return promise or synchronous result as below
+function customContextBuilder(event, principal, decodedToken) {
+    return {
+        name: decodedToken['sub'],
+        foo: 'bar'
+    }
+}
+
+const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
+    { contextBuilder: customContextBuilder }
+);
+
+exports.handler = authorizer.handler.bind(authorizer);
+```
+
+If you throw an error anywhere in the customContextBuilder the request will be denied (HTTP 401).
+
+### 4.3. Customize Additional Auth Checks
+
+The validity of the JWT and/or Basic Authentication credentials will always be checked. A custom function can be provided in which you can include your own additional checks. If you throw an error anywhere in that function the request will be denied (HTTP 401).
+
+```js
+// May return promise or synchronous result as below
+function customAuthChecks(event, principal, decodedToken) {
+    if (!event.headers['X-SHOULD-BE-PRESENT']) {
+        throw new Error('HTTP header X-SHOULD-BE-PRESENT is required');
+    }
+}
+
+const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
+    { authChecks: customAuthChecks }
+);
+
+exports.handler = authorizer.handler.bind(authorizer);
+```
+
+### 4.4. Customize Determination of principalId
+
+If you want to take control of the determination of the principalId that is used in the AWS policy and cloudwatch logging, specify a custom JwtPrincipalIdSelectorFunction.
+
+This is only useful for JWT auth, because for Basic Authentication the username will be used as principalId.
+
+```js
+// May return promise or synchronous result as below
+function customJwtPrincipalIdSelectorFunction(event, decodedToken) {
+    return 'principalId of your liking';
+}
+
+const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
+    { jwtPrincipalIdSelectorFunction: customJwtPrincipalIdSelectorFunction }
+);
+
+exports.handler = authorizer.handler.bind(authorizer);
+```
+
+If a custom principalId selector for JWT is not provided, the default principalId selector for JWT will be used which will try the following JWT claims in order, the first one that has a value will be used:
+
+1. `email`
+1. `upn`
+1. `sub`
