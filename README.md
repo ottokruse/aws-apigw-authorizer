@@ -49,6 +49,8 @@ See instructions here: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-creat
 
 Make sure you give the lambda the right environment variables, see below.
 
+Use the Lambda function you created for your API Gateway Authorizer. Make sure the "Lambda Event Payload" of that authorizer is set to "Request" (explained here: https://aws.amazon.com/blogs/compute/using-enhanced-request-authorizers-in-amazon-api-gateway/). This will (a.o.) give access to the source IP-address of calls to your API.
+
 ### 2.2. Customize Policy Builder
 
 A custom function can be provided for building custom AWS IAM policies. The custom function will be called after succesfull authentication:
