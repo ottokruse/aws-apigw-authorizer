@@ -148,19 +148,12 @@ function defaultBuildPolicy(event: AWSLambda.CustomAuthorizerEvent, principalId:
         stage: apiGatewayArnTmp[1],
     }
 
-    // Limit the supplied policy to the current IP-address of the caller
-    const conditions = {
-        IpAddress: {
-            'aws:SourceIp': event.requestContext && event.requestContext.identity.sourceIp
-        }
-    }
-
     // Allow access to all methods on the entire API
     // Such a wildcard is necessary in case of authorization caching because on the second call
     // a different resource or method may be used, which needs to be covered by the cached policy
     // otherwise it would be denied
     const policy = new awsPolicyLib.AuthPolicy(principalId, awsAccountId, apiOptions) as any;
-    policy.allowMethodWithConditions(awsPolicyLib.AuthPolicy.HttpVerb.ALL, '/*', conditions);
+    policy.allowMethod(awsPolicyLib.AuthPolicy.HttpVerb.ALL, '/*');
 
     return policy.build();
 

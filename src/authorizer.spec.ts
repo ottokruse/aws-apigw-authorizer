@@ -67,12 +67,7 @@ describe('authorizer', () => {
             "Effect": "Allow",
             "Resource": [
               "arn:aws:execute-api:eu-west-1:123456789000:function/*/*/*"
-            ],
-            "Condition": {
-              "IpAddress": {
-                "aws:SourceIp": "192.168.0.1"
-              }
-            }
+            ]
           }
         ]
       }
@@ -129,12 +124,7 @@ describe('authorizer', () => {
             "Effect": "Allow",
             "Resource": [
               "arn:aws:execute-api:eu-west-1:123456789000:function/*/*/*"
-            ],
-            "Condition": {
-              "IpAddress": {
-                "aws:SourceIp": "192.168.0.1"
-              }
-            }
+            ]
           }
         ]
       }
@@ -159,12 +149,7 @@ describe('authorizer', () => {
             "Effect": "Allow",
             "Resource": [
               "arn:aws:execute-api:eu-west-1:123456789000:function/*/*/*"
-            ],
-            "Condition": {
-              "IpAddress": {
-                "aws:SourceIp": "192.168.0.1"
-              }
-            }
+            ]
           }
         ]
       }
