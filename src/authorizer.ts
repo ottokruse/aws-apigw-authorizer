@@ -17,8 +17,8 @@ export type JwtPrincipalIdSelectorFunction = (event: AWSLambda.CustomAuthorizerE
 export interface AuthorizerConfig {
     policyBuilder?: PolicyBuilderFunction;
     contextBuilder?: ContextBuilderFunction;
-    AuthChecks?: AuthChecksFunction;
-    jwtPrincipalIdSelectorFunction?: JwtPrincipalIdSelectorFunction;
+    authChecks?: AuthChecksFunction;
+    jwtPrincipalIdSelector?: JwtPrincipalIdSelectorFunction;
 }
 
 export type Jwt = string | object;
@@ -37,8 +37,8 @@ export class ApiGatewayAuthorizer {
         // parse config
         this.policyBuilder = authorizerConfig && authorizerConfig.policyBuilder || defaultBuildPolicy;
         this.contextBuilder = authorizerConfig && authorizerConfig.contextBuilder || (() => undefined);
-        this.authChecks = authorizerConfig && authorizerConfig.AuthChecks || (() => undefined);
-        this.principalIdSelectorFunction = authorizerConfig && authorizerConfig.jwtPrincipalIdSelectorFunction || defaultJwtPrincipalIdSelector;
+        this.authChecks = authorizerConfig && authorizerConfig.authChecks || (() => undefined);
+        this.principalIdSelectorFunction = authorizerConfig && authorizerConfig.jwtPrincipalIdSelector || defaultJwtPrincipalIdSelector;
 
         // check environment for configured auth flavors
         if (Object.keys(process.env).filter(key => key.startsWith('BASIC_AUTH_USER_')).length) {
