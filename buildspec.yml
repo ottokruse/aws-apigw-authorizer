@@ -7,13 +7,18 @@ env:
 phases:
   install:
     commands:
-      - npm it
+      - npm it --production
   build:
     commands:
       - npm run build
   post_build:
     commands:
-      - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc && npm publish
+      - < NPM_VERSION=$(npm view aws-apigw-authorizer version) && \
+          LOCAL_VERSION=$(node build-scripts/get-local-version.js) && \
+          if [[ ${LOCAL_VERSION} != ${NPM_VERSION} ]]; then \
+              echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc \
+              npm publish \
+          fi;
 cache:
   paths:
     - 'node_modules/**/*'
