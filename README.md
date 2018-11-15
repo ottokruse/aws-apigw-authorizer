@@ -41,9 +41,12 @@ Also, the authorizer can be configured to only allow certain source IP's (see be
 Create a Lambda function in AWS using **Node 8.10** runtime and use the following code:
 
 ```js
-const lambdaAuthorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer();
+import { ApiGatewayAuthorizer } from 'aws-apigw-authorizer';
 
-exports.handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
+const lambdaAuthorizer = new ApiGatewayAuthorizer();
+
+// use the authorizers handler as the lambda handler function:
+export const handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
 ```
 
 Of course you will have to create a deployment package to include `aws-apigw-authorizer` and it's dependencies.
@@ -121,8 +124,12 @@ These are optional environment keys, without which JWT Authentication is not ena
 A custom function can be provided for building custom AWS IAM policies. The custom function will be called after succesfull authentication:
 
 ```js
+import { ApiGatewayAuthorizer } from 'aws-apigw-authorizer';
+
+const lambdaAuthorizer = new ApiGatewayAuthorizer({ policyBuilder: customPolicyBuilder });
+
 // May return promise or synchronous result as below
-function customPolicyBuilder(event, principal, decodedJwt) {
+function customPolicyBuilder(_event, _principal, _decodedJwt) {
     // event: the raw event that the authorizer lambda function receives from API Gateway 
     // principal: the username of the authenticated user
     // decodedJwt: the decoded JWT. Only present if authentication was based on JWT
@@ -150,11 +157,7 @@ function customPolicyBuilder(event, principal, decodedJwt) {
     }
 }
 
-const lambdaAuthorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
-    { policyBuilder: customPolicyBuilder }
-);
-
-exports.handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
+export const handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
 ```
 
 If a custom policy builder is not provided, the default policy builder will be used, which will grant the user access to invoke all resources of the API using any HTTP method.
@@ -165,18 +168,18 @@ A custom function can be provided for setting the authorization context (https:/
 
 ```js
 // May return promise or synchronous result as below
-function customContextBuilder(event, principal, decodedToken) {
+import { ApiGatewayAuthorizer } from 'aws-apigw-authorizer';
+
+const lambdaAuthorizer = new ApiGatewayAuthorizer({ contextBuilder: customContextBuilder });
+
+function customContextBuilder(_event, _principal, decodedToken) {
     return {
         name: decodedToken['sub'],
         foo: 'bar'
     }
 }
 
-const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
-    { contextBuilder: customContextBuilder }
-);
-
-exports.handler = authorizer.handler.bind(authorizer);
+export const handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
 ```
 
 If you throw an error anywhere in the customContextBuilder the request will be denied (HTTP 401).
