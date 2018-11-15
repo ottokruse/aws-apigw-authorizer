@@ -11,17 +11,17 @@ phases:
   build:
     commands:
       - npm run build
-      - < mkdir smoke-test && cd smoke-test && \
-          npm init -y && npm i ../aws-apigw-authorizer && \
-          node -e "const importTest = require('aws-apigw-authorizer')"
+      - mkdir smoke-test && cd smoke-test && \
+        npm init -y && npm i ../aws-apigw-authorizer && \
+        node -e "const importTest = require('aws-apigw-authorizer')"
   post_build:
     commands:
-      - < NPM_VERSION=$(npm view aws-apigw-authorizer version) && \
-          LOCAL_VERSION=$(node build-scripts/get-local-version.js) && \
-          if [[ ${LOCAL_VERSION} != ${NPM_VERSION} ]]; then \
-              echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc \
-              npm publish \
-          fi;
+      - NPM_VERSION=$(npm view aws-apigw-authorizer version) && \
+        LOCAL_VERSION=$(node build-scripts/get-local-version.js) && \
+        if [[ ${LOCAL_VERSION} != ${NPM_VERSION} ]]; then \
+            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc \
+            npm publish \
+        fi;
 cache:
   paths:
     - 'node_modules/**/*'
