@@ -7,10 +7,13 @@ env:
 phases:
   install:
     commands:
-      - npm it --production
+      - npm it
   build:
     commands:
       - npm run build
+      - < mkdir smoke-test && cd smoke-test && \
+          npm init -y && npm i ../aws-apigw-authorizer && \
+          node -e "const importTest = require('aws-apigw-authorizer')"
   post_build:
     commands:
       - < NPM_VERSION=$(npm view aws-apigw-authorizer version) && \
