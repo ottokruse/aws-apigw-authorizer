@@ -7,7 +7,7 @@ env:
 phases:
   install:
     commands:
-      - npm install-ci-test
+      - npm cit
   build:
     commands:
       - npm run build
