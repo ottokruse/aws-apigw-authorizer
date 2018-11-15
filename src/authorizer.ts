@@ -166,7 +166,7 @@ function defaultJwtPrincipalIdSelector(_event: AWSLambda.CustomAuthorizerEvent, 
         // Different identity providers put different claims on tokens
         // Auth0 seems to always include the 'email' claim
         // Microsoft seems to always put the e-mail address in 'upn' claim
-        // Last resort  is the 'sub' claim which should mostly be present but contains an ID specific to the identity provider
+        // Last resort is the 'sub' claim which should mostly be present but contains an ID specific to the identity provider
         principalId = decodedToken['email'] || decodedToken['upn'] || decodedToken['sub'];
     }
     return principalId || 'Undeterminable Principal';
