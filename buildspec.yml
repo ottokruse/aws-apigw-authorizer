@@ -19,7 +19,7 @@ phases:
     commands:
       - NPM_VERSION=$(npm view aws-apigw-authorizer version) &&
         LOCAL_VERSION=$(node build-scripts/get-local-version.js) &&
-        if [[ ${LOCAL_VERSION} != ${NPM_VERSION} ]]; then
+        if [ ${LOCAL_VERSION} != ${NPM_VERSION} ]; then
             echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc;
             npm publish;
         fi;
