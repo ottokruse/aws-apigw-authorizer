@@ -1,3 +1,5 @@
+![Master Build Status](https://codebuild.eu-west-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiSElLMnMrZHMxb1lXSndJR3ZvSDBoajV1c0gwTlQ1MUtzNVlzanRJeVFIaDBMRkZ6NHNFMnRZSEc3S1dtVW16UzJOeUIxcVJ6OFEyazFqZUN6T1hBd3FvPSIsIml2UGFyYW1ldGVyU3BlYyI6Im5RRFFxT2h3T0FMbmxZOEUiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
+
 # AWS Lambda Authorizer for API Gateway
 
 This is an implementation in NodeJS of an authorizer function for AWS API Gateway. 

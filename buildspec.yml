@@ -1,0 +1,19 @@
+version: 0.2
+
+env:
+  parameter-store:
+    NPM_TOKEN: /ottokruse/npm/token
+
+phases:
+  install:
+    commands:
+      - npm install-ci-test
+  build:
+    commands:
+      - npm run build
+  post_build:
+    commands:
+      - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc && npm publish
+cache:
+  paths:
+    - 'node_modules/**/*'
