@@ -79,8 +79,11 @@ export class ApiGatewayAuthorizer {
 
     private async determineAuthorization(event: AWSLambda.CustomAuthorizerEvent) {
 
+        // Change headers to lowercase to support HTTP/2. See https://tools.ietf.org/html/rfc7540#section-8.1.2
+        event.headers = toLowerCaseKeys(event.headers);
+
         // Sanity check: the Authorization header must be present
-        if (!event.headers || !event.headers.Authorization) {
+        if (!event.headers || !event.headers.authorization) {
             throw new Error('Authorization HTTP header not present');
         }
 
@@ -101,7 +104,7 @@ export class ApiGatewayAuthorizer {
         }
 
         // Validate credentials
-        const [tokenType, token] = event.headers.Authorization.split(' ');
+        const [tokenType, token] = event.headers.authorization.split(' ');
         if (tokenType === 'Bearer' && this.jwtAuthenticationEnabled) {
             const decodedToken = await jwtValidator.validate(token);
             const principalId = await this.principalIdSelectorFunction(event, decodedToken);
@@ -170,4 +173,11 @@ function defaultJwtPrincipalIdSelector(_event: AWSLambda.CustomAuthorizerEvent, 
         principalId = decodedToken['email'] || decodedToken['upn'] || decodedToken['sub'];
     }
     return principalId || 'Undeterminable Principal';
+}
+
+function toLowerCaseKeys(obj: any) {
+    return Object.keys(obj).reduce((accum, key) => {
+        accum[key.toLowerCase()] = obj[key];
+        return accum;
+    }, {});
 }
