@@ -133,6 +133,37 @@ describe('authorizer', () => {
     await expect(callHandler(event)).to.eventually.deep.equal(expectation);
   });
 
+  it('JWT validation works case insensitive for HTTP/2', async () => {
+    event.headers.authorization = `Bearer ${config.idToken}`;
+    process.env.AUDIENCE_URI = config.userInfoAudience;
+
+    const expectation = {
+      "principalId": "api-gw-auth-tester@sharklasers.com",
+      "context": {
+        "name": "api-gw-auth-tester@sharklasers.com"
+      },
+      "policyDocument": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": "execute-api:Invoke",
+            "Effect": "Allow",
+            "Resource": [
+              "arn:aws:execute-api:eu-west-1:123456789000:function/*/*/*"
+            ]
+          }
+        ]
+      }
+    };
+
+    await expect(callHandler(event)).to.eventually.deep.equal(expectation);
+
+    // remove the lowercase and replace with uppercase Authorization
+    delete event.headers.authorization
+    event.headers.Authorization = `Bearer ${config.idToken}`;
+    await expect(callHandler(event)).to.eventually.deep.equal(expectation);
+  });
+
   it('Basic auth validatie slaagt', async () => {
     event.headers.Authorization = 'Basic ' + new Buffer(`MDTPI:${process.env.BASIC_AUTH_USER_MDTPI}`).toString('base64');
 
