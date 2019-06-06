@@ -1,6 +1,6 @@
 {
   "name": "aws-apigw-authorizer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "AWS Lambda Authorizer for API Gateway",
   "keywords": [
     "aws",
@@ -30,7 +30,7 @@
     "lib/!(*.spec).js",
     "lib/!(*.spec).d.ts"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "homepage": "https://github.com/ottokruse/aws-apigw-authorizer",
   "dependencies": {
     "@types/aws-lambda": "^8.10.26",
