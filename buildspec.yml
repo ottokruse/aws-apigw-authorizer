@@ -11,10 +11,7 @@ phases:
   build:
     commands:
       - npm run build
-      - mkdir smoke-test && cd smoke-test &&
-        npm init -y && npm i ../ &&
-        node -e "const importTest = require('aws-apigw-authorizer');" &&
-        cd - && echo " >> Import test OK"
+      - npm run smoke-test
   post_build:
     commands:
       - NPM_VERSION=$(npm view aws-apigw-authorizer version) &&

@@ -1,8 +1,8 @@
 import * as basicAuthValidator from './basic-auth-validator';
-import * as ipRangeCheck from 'ip-range-check';
+const ipRangeCheck = require('ip-range-check'); // no typings available
 import * as jwtValidator from './jwt-validator';
 import * as AWSLambda from 'aws-lambda';
-const awsPolicyLib = require('./aws-policy-lib');
+const awsPolicyLib = require('./aws-policy-lib'); // plain JS file
 
 export type PolicyBuilderFunction = (event: AWSLambda.CustomAuthorizerEvent, principalId: string, decodedToken?: Jwt) => AWSLambda.PolicyDocument | Promise<AWSLambda.PolicyDocument>;
 
@@ -21,7 +21,7 @@ export interface AuthorizerConfig {
     jwtPrincipalIdSelector?: JwtPrincipalIdSelectorFunction;
 }
 
-export type Jwt = string | object;
+export type Jwt = jwtValidator.Jwt;
 
 export class ApiGatewayAuthorizer {
 
@@ -162,7 +162,7 @@ function defaultBuildPolicy(event: AWSLambda.CustomAuthorizerEvent, principalId:
 
 }
 
-function defaultJwtPrincipalIdSelector(_event: AWSLambda.CustomAuthorizerEvent, decodedToken: Jwt): PrincipalId {
+function defaultJwtPrincipalIdSelector(_event: AWSLambda.CustomAuthorizerEvent, decodedToken?: Jwt): PrincipalId {
     let principalId: PrincipalId | undefined;
     if (decodedToken) {
 
@@ -179,5 +179,5 @@ function toLowerCaseKeys(obj: any) {
     return Object.keys(obj).reduce((accum, key) => {
         accum[key.toLowerCase()] = obj[key];
         return accum;
-    }, {});
+    }, {} as { [key: string]: any });
 }

@@ -1,6 +1,8 @@
 import * as jwt from 'jsonwebtoken';
 import * as jwksClient from 'jwks-rsa';
 
+export type Jwt = { [key: string]: any }
+
 let _jwksClient: jwksClient.JwksClient;
 let _jwksClientUri: string;
 
@@ -23,11 +25,11 @@ export async function validate(jwtToken: string) {
     const expectedIssuer = process.env.ISSUER_URI;
     const jwksUri = process.env.JWKS_URI;
 
-    const decodedJwtToken = jwt.decode(jwtToken, { complete: true });
+    const decodedJwtToken = jwt.decode(jwtToken, { complete: true }) as Jwt;
     if (!decodedJwtToken) {
         throw new Error('Cannot parse JWT token');
     }
-    const kid = decodedJwtToken['header'] && decodedJwtToken['header']['kid'];
+    const kid = decodedJwtToken['header']['kid'];
     const jwk = await getSigningKey(jwksUri, kid);
     const signingKey = jwk.publicKey || jwk.rsaPublicKey;
     if (!signingKey) {
@@ -44,7 +46,7 @@ export async function validate(jwtToken: string) {
     }
     // Verify the JWT
     // This either rejects (JWT not valid), or resolves withe the decoded token (object or string)
-    return new Promise<object | string>((resolve, reject) => {
-        jwt.verify(jwtToken, signingKey, verificationOptions, (err, decodedJwtToken) => err ? reject(err) : resolve(decodedJwtToken));
+    return new Promise<Jwt>((resolve, reject) => {
+        jwt.verify(jwtToken, signingKey, verificationOptions, (err, decodedJwtToken) => err ? reject(err) : resolve(decodedJwtToken as Jwt));
     });
 }

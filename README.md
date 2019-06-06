@@ -38,7 +38,7 @@ Also, the authorizer can be configured to only allow certain source IP's (see be
 
 ### 2.1. Create a Lambda Function
 
-Create a Lambda function in AWS using **Node 8.10** runtime and use the following code:
+Create a Lambda function in AWS using **Node 10.x** runtime and use the following code:
 
 ```js
 import { ApiGatewayAuthorizer } from 'aws-apigw-authorizer';
