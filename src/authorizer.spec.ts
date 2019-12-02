@@ -24,7 +24,8 @@ describe('authorizer', () => {
     userInfoAudience: 'yENwuC2bjQGu3QJ5Zvx8E6bel2EuvvFB',
     apiAudience: 'https://api.ottorocket.com',
     issuer: 'https://ottokruse.eu.auth0.com/',
-    jwksUri: 'https://ottokruse.eu.auth0.com/.well-known/jwks.json'
+    jwksUri: 'https://ottokruse.eu.auth0.com/.well-known/jwks.json',
+    jwksUriNoMatch: 'https://ottokruse2.eu.auth0.com/.well-known/jwks.json'
   };
 
   beforeEach(() => {
@@ -52,6 +53,7 @@ describe('authorizer', () => {
   });
 
   it('JWT validation Auth0 succeeds', async () => {
+    process.env.JWKS_URI = `${config.jwksUri},${config.jwksUriNoMatch}`;
     event.headers.Authorization = `Bearer ${config.accessToken}`;
 
     const expectation = {
@@ -78,6 +80,7 @@ describe('authorizer', () => {
   });
 
   it('JWT validation can succeed on any IP if configured', async () => {
+    process.env.JWKS_URI = `${config.jwksUriNoMatch},${config.jwksUri}`;
     event.headers.Authorization = `Bearer ${config.accessToken}`;
     process.env.ALLOWED_IP_ADDRESSES = '192.168.0.1/32,0.0.0.0/0';
     event.requestContext.identity.sourceIp = "127.0.0.1";
@@ -222,7 +225,10 @@ describe('authorizer', () => {
 });
 
 function setupNockMocks() {
-  nock('https://mijnnvs.eu.auth0.com')
+  nock('https://ottokruse.eu.auth0.com')
     .get('/.well-known/jwks.json')
     .replyWithFile(200, `${__dirname}/../test/jwks-Auth0.mock.json`);
+  nock('https://ottokruse2.eu.auth0.com')
+    .get('/.well-known/jwks.json')
+    .replyWithFile(200, `${__dirname}/../test/jwks-Auth0-no-match.mock.json`);
 }
