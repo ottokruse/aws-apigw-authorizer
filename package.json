@@ -1,6 +1,6 @@
 {
   "name": "aws-apigw-authorizer-extended",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Extended AWS Lambda Authorizer for API Gateway",
   "keywords": [
     "aws",
@@ -37,7 +37,7 @@
     "basic-auth": "^2.0.1",
     "ip-range-check": "0.0.2",
     "jsonwebtoken": "^8.5.1",
-    "jwks-rsa": "^1.5.1"
+    "jwks-rsa": "1.5.1"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
@@ -87,6 +87,7 @@
     "url": "https://github.com/DaphneOlrichs/aws-apigw-authorizer-extended/issues"
   },
   "directories": {
+    "lib": "lib",
     "test": "test"
   }
 }
