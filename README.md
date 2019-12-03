@@ -107,13 +107,13 @@ This is an optional environment key, without which Basic Authentication is not e
 
 ### 3.3. AUDIENCE_URI, ISSUER_URI, JWKS_URI
 
-For JWT authentication provide a value for `AUDIENCE_URI`, `ISSUER_URI` and `JWKS_URI`
+For JWT authentication provide a value for `AUDIENCE_URI`, `ISSUER_URI` and `JWKS_URI`. Multiple values can be provided via comma separated strings.
 
 Example:
 
-    AUDIENCE_URI=123456cc-cd12-1234-ff66-7897fabcd12
-    ISSUER_URI=https://sts.yourserver.com/876abc-ab12-8765-ff43-75232abc/
-    JWKS_URI=https://login.yourserver.com/common/discovery/keys'
+    AUDIENCE_URI=123456cc-cd12-1234-ff66-7897fabcd12,987654xx-xw98-9876-uu44-3213uzyxw98
+    ISSUER_URI=https://sts.yourserver.com/876abc-ab12-8765-ff43-75232abc/,https://sts.anotherserver.com/234zyx-zy98-2345-uu67-35878zyx/
+    JWKS_URI=https://login.yourserver.com/common/discovery/keys,https://login.anotherserver.com/common/discovery/keys
 
 These are optional environment keys, without which JWT Authentication is not enabled.
 
