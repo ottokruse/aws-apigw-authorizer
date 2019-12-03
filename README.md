@@ -1,8 +1,8 @@
 ![Master Build Status](https://codebuild.eu-west-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiSElLMnMrZHMxb1lXSndJR3ZvSDBoajV1c0gwTlQ1MUtzNVlzanRJeVFIaDBMRkZ6NHNFMnRZSEc3S1dtVW16UzJOeUIxcVJ6OFEyazFqZUN6T1hBd3FvPSIsIml2UGFyYW1ldGVyU3BlYyI6Im5RRFFxT2h3T0FMbmxZOEUiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 
-# AWS Lambda Authorizer for API Gateway
+# Extended AWS Lambda Authorizer for API Gateway
 
-This is an implementation in NodeJS of an authorizer function for AWS API Gateway. 
+This is an implementation in NodeJS of an authorizer function for AWS API Gateway. It extends the package aws-apigw-authorizer in supporting JWT validation against multiple sources.
 
 (i.e. an implementation of this: https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html)
 
@@ -41,7 +41,7 @@ Also, the authorizer can be configured to only allow certain source IP's (see be
 Create a Lambda function in AWS using **Node 10.x** runtime and use the following code:
 
 ```js
-import { ApiGatewayAuthorizer } from 'aws-apigw-authorizer';
+import { ApiGatewayAuthorizer } from 'aws-apigw-authorizer-extended';
 
 const lambdaAuthorizer = new ApiGatewayAuthorizer();
 
@@ -49,9 +49,9 @@ const lambdaAuthorizer = new ApiGatewayAuthorizer();
 export const handler = lambdaAuthorizer.handler.bind(lambdaAuthorizer);
 ```
 
-Of course you will have to create a deployment package to include `aws-apigw-authorizer` and it's dependencies.
+Of course you will have to create a deployment package to include `aws-apigw-authorizer-extended` and it's dependencies.
 
-    npm install aws-apigw-authorizer
+    npm install aws-apigw-authorizer-extended
 
 See instructions here: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-create-deployment-pkg.html
 
@@ -124,7 +124,7 @@ These are optional environment keys, without which JWT Authentication is not ena
 A custom function can be provided for building custom AWS IAM policies. The custom function will be called after succesfull authentication:
 
 ```js
-import { ApiGatewayAuthorizer } from 'aws-apigw-authorizer';
+import { ApiGatewayAuthorizer } from 'aws-apigw-authorizer-extended';
 
 const lambdaAuthorizer = new ApiGatewayAuthorizer({ policyBuilder: customPolicyBuilder });
 
@@ -168,7 +168,7 @@ A custom function can be provided for setting the authorization context (https:/
 
 ```js
 // May return promise or synchronous result as below
-import { ApiGatewayAuthorizer } from 'aws-apigw-authorizer';
+import { ApiGatewayAuthorizer } from 'aws-apigw-authorizer-extended';
 
 const lambdaAuthorizer = new ApiGatewayAuthorizer({ contextBuilder: customContextBuilder });
 
@@ -196,7 +196,7 @@ function customAuthChecks(event, principal, decodedToken) {
     }
 }
 
-const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
+const authorizer = new (require('aws-apigw-authorizer-extended')).ApiGatewayAuthorizer(
     { authChecks: customAuthChecks }
 );
 
@@ -215,7 +215,7 @@ function customJwtPrincipalIdSelectorFunction(event, decodedToken) {
     return 'principalId of your liking';
 }
 
-const authorizer = new (require('aws-apigw-authorizer')).ApiGatewayAuthorizer(
+const authorizer = new (require('aws-apigw-authorizer-extended')).ApiGatewayAuthorizer(
     { jwtPrincipalIdSelectorFunction: customJwtPrincipalIdSelectorFunction }
 );
 
