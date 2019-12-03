@@ -3,21 +3,18 @@ import * as jwksClient from 'jwks-rsa';
 
 export type Jwt = { [key: string]: any }
 
-let _jwksClient: jwksClient.JwksClient;
-let _jwksClientUri: string;
+let _jwksClientMap: Map<string,jwksClient.JwksClient> = new Map;
 
 async function getSigningKey(jwksUriList: string[], kid: string) {
     let error: Error;
     return new Promise<jwksClient.Jwk>(async(resolve, reject) => {
         for (const jwksUri of jwksUriList) {
-            if (!_jwksClient || jwksUri !== _jwksClientUri || process.env.JWKS_NO_CACHE) {
-                _jwksClientUri = jwksUri;
-                _jwksClient = jwksClient({ cache: true, rateLimit: true, jwksUri });
+            if (!_jwksClientMap.size || !_jwksClientMap.has(jwksUri) || process.env.JWKS_NO_CACHE) {
+                _jwksClientMap.set(jwksUri, jwksClient({ cache: true, rateLimit: true, jwksUri }));
             }
-            error = await new Promise<Error>((resolveError, _rejectError) => {
-                _jwksClient.getSigningKey(kid, (err, key) => {
-                    key ? resolve(key) : resolveError(err);
-                });
+            error = await new Promise<Error>((resolveError, rejectError) => {
+                const jwksClient = _jwksClientMap.get(jwksUri);
+                jwksClient ? jwksClient.getSigningKey(kid, (err, key) => key ? resolve(key) : resolveError(err)) : rejectError();
             });
         }
         reject(error);
