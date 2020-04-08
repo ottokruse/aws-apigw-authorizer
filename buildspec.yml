@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   parameter-store:
-    NPM_TOKEN: /ottokruse/npm/token
+    NPM_TOKEN: /daphneolrichs/npm/token
 
 phases:
   install:
@@ -14,7 +14,7 @@ phases:
       - npm run smoke-test
   post_build:
     commands:
-      - NPM_VERSION=$(npm view aws-apigw-authorizer version) &&
+      - NPM_VERSION=$(npm view aws-apigw-authorizer-extended version) &&
         LOCAL_VERSION=$(node build-scripts/get-local-version.js) &&
         if [ ${LOCAL_VERSION} != ${NPM_VERSION} ]; then
             echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc;

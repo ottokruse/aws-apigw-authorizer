@@ -13,7 +13,8 @@ describe('JWT validator', () => {
         userInfoAudience: 'yENwuC2bjQGu3QJ5Zvx8E6bel2EuvvFB',
         apiAudience: 'https://api.ottorocket.com',
         issuer: 'https://ottokruse.eu.auth0.com/',
-        jwksUri: 'https://ottokruse.eu.auth0.com/.well-known/jwks.json'
+        jwksUri: 'https://ottokruse.eu.auth0.com/.well-known/jwks.json',
+        jwksUriNoMatch: 'https://ottokruse2.eu.auth0.com/.well-known/jwks.json'
     };
 
     beforeEach(() => {
@@ -33,7 +34,7 @@ describe('JWT validator', () => {
     it('JWT validation id token Auth0 succeeds', async () => {
         process.env.AUDIENCE_URI = config.userInfoAudience;
         process.env.ISSUER_URI = config.issuer;
-        process.env.JWKS_URI = config.jwksUri;
+        process.env.JWKS_URI = `${config.jwksUri},${config.jwksUriNoMatch}`;
 
         const expectation = {
             "nickname": "api-gw-auth-tester",
@@ -54,7 +55,7 @@ describe('JWT validator', () => {
     it('JWT validation access token Auth0 succeeds', async () => {
         process.env.AUDIENCE_URI = config.apiAudience;
         process.env.ISSUER_URI = config.issuer;
-        process.env.JWKS_URI = config.jwksUri;
+        process.env.JWKS_URI = `${config.jwksUriNoMatch},${config.jwksUri}`;
 
         const expectation = {
             iss: 'https://ottokruse.eu.auth0.com/',
@@ -110,4 +111,7 @@ function setupNockMocks() {
     nock('https://ottokruse.eu.auth0.com')
         .get('/.well-known/jwks.json')
         .replyWithFile(200, `${__dirname}/../test/jwks-Auth0.mock.json`);
+    nock('https://ottokruse2.eu.auth0.com')
+        .get('/.well-known/jwks.json')
+        .replyWithFile(200, `${__dirname}/../test/jwks-Auth0-no-match.mock.json`);
 }

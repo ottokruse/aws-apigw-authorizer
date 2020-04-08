@@ -1,7 +1,7 @@
 {
-  "name": "aws-apigw-authorizer",
-  "version": "0.3.0",
-  "description": "AWS Lambda Authorizer for API Gateway",
+  "name": "aws-apigw-authorizer-extended",
+  "version": "1.0.1",
+  "description": "Extended AWS Lambda Authorizer for API Gateway",
   "keywords": [
     "aws",
     "apigateway",
@@ -19,25 +19,25 @@
     "watch": "mocha --watch --require ts-node/register --watch-extensions ts --timeout 5000 ./src/*.spec.ts",
     "tsc": "tsc --skipLibCheck",
     "build": "npm run cover && rm -rf lib && npm run tsc && cp src/*.js lib/",
-    "smoke-test": "mkdir -p smoke-test && cd smoke-test && npm init -y && npm i ../ && node -e \"const importTest = require('aws-apigw-authorizer');\" && echo \" >> Import test OK\"; cd -; rm -rf smoke-test"
+    "smoke-test": "mkdir -p smoke-test && cd smoke-test && npm init -y && npm i ../ && node -e \"const importTest = require('aws-apigw-authorizer-extended');\" && echo \" >> Import test OK\"; cd -; rm -rf smoke-test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ottokruse/aws-apigw-authorizer.git"
+    "url": "git+https://github.com/DaphneOlrichs/aws-apigw-authorizer-extended.git"
   },
-  "author": "ottokruse@gmail.com",
+  "author": "daphne@olrichs.nl",
   "files": [
     "lib/!(*.spec).js",
     "lib/!(*.spec).d.ts"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/ottokruse/aws-apigw-authorizer",
+  "homepage": "https://github.com/DaphneOlrichs/aws-apigw-authorizer-extended",
   "dependencies": {
     "@types/aws-lambda": "^8.10.26",
     "basic-auth": "^2.0.1",
     "ip-range-check": "0.0.2",
     "jsonwebtoken": "^8.5.1",
-    "jwks-rsa": "^1.5.1"
+    "jwks-rsa": "1.5.1"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
@@ -82,5 +82,12 @@
       "html"
     ],
     "all": true
+  },
+  "bugs": {
+    "url": "https://github.com/DaphneOlrichs/aws-apigw-authorizer-extended/issues"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
   }
 }

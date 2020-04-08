@@ -3,16 +3,21 @@ import * as jwksClient from 'jwks-rsa';
 
 export type Jwt = { [key: string]: any }
 
-let _jwksClient: jwksClient.JwksClient;
-let _jwksClientUri: string;
+let _jwksClientMap: Map<string,jwksClient.JwksClient> = new Map;
 
-async function getSigningKey(jwksUri: string, kid: string) {
-    if (!_jwksClient || jwksUri !== _jwksClientUri || process.env.JWKS_NO_CACHE) {
-        _jwksClientUri = jwksUri;
-        _jwksClient = jwksClient({ cache: true, rateLimit: true, jwksUri });
-    }
-    return new Promise<jwksClient.Jwk>((resolve, reject) => {
-        _jwksClient.getSigningKey(kid, (err, jwk) => err ? reject(err) : resolve(jwk));
+async function getSigningKey(jwksUriList: string[], kid: string) {
+    let error: Error;
+    return new Promise<jwksClient.Jwk>(async(resolve, reject) => {
+        for (const jwksUri of jwksUriList) {
+            if (!_jwksClientMap.size || !_jwksClientMap.has(jwksUri) || process.env.JWKS_NO_CACHE) {
+                _jwksClientMap.set(jwksUri, jwksClient({ cache: true, rateLimit: true, jwksUri }));
+            }
+            error = await new Promise<Error>((resolveError, rejectError) => {
+                const jwksClient = _jwksClientMap.get(jwksUri);
+                jwksClient ? jwksClient.getSigningKey(kid, (err, key) => key ? resolve(key) : resolveError(err)) : rejectError();
+            });
+        }
+        reject(error);
     });
 }
 
@@ -21,23 +26,23 @@ export async function validate(jwtToken: string) {
         throw new Error('JWT validator configuration incomplete. Need AUDIENCE_URI, ISSUER_URI, JWKS_URI');
     }
 
-    const expectedAudience = process.env.AUDIENCE_URI;
-    const expectedIssuer = process.env.ISSUER_URI;
-    const jwksUri = process.env.JWKS_URI;
+    const expectedAudienceList = process.env.AUDIENCE_URI.split(',');
+    const expectedIssuerList = process.env.ISSUER_URI.split(',');
+    const jwksUriList = process.env.JWKS_URI.split(',');
 
     const decodedJwtToken = jwt.decode(jwtToken, { complete: true }) as Jwt;
     if (!decodedJwtToken) {
         throw new Error('Cannot parse JWT token');
     }
     const kid = decodedJwtToken['header']['kid'];
-    const jwk = await getSigningKey(jwksUri, kid);
+    const jwk = await getSigningKey(jwksUriList, kid);
     const signingKey = jwk.publicKey || jwk.rsaPublicKey;
     if (!signingKey) {
         throw new Error('Cannot determine the key with which the token was signed');
     }
     const verificationOptions = {
-        audience: expectedAudience,
-        issuer: expectedIssuer,
+        audience: expectedAudienceList,
+        issuer: expectedIssuerList,
         ignoreExpiration: false
     };
     // For testing purposes JWT expiration can be disregarded using an environment variable
